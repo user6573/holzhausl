@@ -5,41 +5,54 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Holzhaus mit Chat</title>
   <style>
-    /* Hintergrund-Iframe (Holzhaus) */
+    /* HTML/Body komplett ohne Ränder */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    /* Hintergrund-IFrame */
     #background-iframe {
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      border: 0;
+      width: 100vw;
+      height: 100vh;
+      border: none;
       z-index: 0;
     }
 
-    /* Chat-Button unten rechts, größer und weiter heraus */
+    /* Chat-Button: etwas dunkleres Holz, aber gut erkennbar */
     #chat-toggle {
       position: fixed;
-      bottom: 60px;  /* weiter aus der Ecke */
-      right: 60px;   /* weiter aus der Ecke */
-      width: 80px;   /* größer */
-      height: 80px;  /* größer */
+      bottom: 80px;
+      right: 80px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
-      background: #007bff;
-      color: #fff;
       border: none;
-      font-size: 20px;  /* größere Beschriftung */
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       z-index: 2;
+      /* Dunklerer Holz-Fallback */
+      background-color: #A0522D; /* Sienna, dunkler Holzton */
+      /* Holztextur */
+      background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/tileable_wood_texture.png');
+      background-size: cover;
+      background-position: center;
+      font-size: 36px;
+      color: #fff;
+      line-height: 1;
     }
 
-    /* Chat-Fenster, initial ausserhalb (größer) */
+    /* Chat-Container: dynamische Höhe und Abstand zur Leiste */
     #chat-container {
       position: fixed;
-      bottom: 150px;         /* 60px (Button bottom) + 80px (Button height) + 10px Abstand */
-      right: -440px;         /* 400px Breite + 40px Puffer */
-      width: 400px;          /* noch breiter */
-      height: 700px;         /* noch höher */
+      top: 120px;         /* Abstand zum oberen Rand, um Leiste freizuhalten */
+      bottom: 200px;      /* Abstand zum unteren Rand (Platz für den Button) */
+      right: -480px;      /* versteckt außerhalb */
+      width: 440px;
       background: #fff;
       border: 1px solid #ccc;
       border-radius: 8px;
@@ -48,9 +61,8 @@
       transition: right 0.3s ease-in-out;
       z-index: 1;
     }
-    /* offen: fährt ins Bild */
     #chat-container.open {
-      right: 60px;           /* passt zum Button */
+      right: 80px;       /* passend zum Button */
     }
 
     /* Schließen-Knopf im Chat */
@@ -62,22 +74,21 @@
       border: none;
       font-size: 24px;
       cursor: pointer;
-      line-height: 1;
       color: #666;
       z-index: 2;
     }
 
-    /* Bot-Iframe füllt Container */
+    /* Bot-IFrame füllt den Container komplett */
     #chat-iframe {
       width: 100%;
       height: 100%;
-      border: 0;
+      border: none;
     }
   </style>
 </head>
 <body>
 
-  <!-- Hintergrund: Holzhaus-Webseite -->
+  <!-- Vollbild-Hintergrund: Holzhaus-Webseite -->
   <iframe
     id="background-iframe"
     src="https://holzhaus.com"
@@ -85,9 +96,9 @@
   </iframe>
 
   <!-- Button zum Öffnen des Chats -->
-  <button id="chat-toggle">Chat</button>
+  <button id="chat-toggle">💬</button>
 
-  <!-- Chat-Fenster, das hereinfährt -->
+  <!-- Chat-Fenster -->
   <div id="chat-container">
     <button id="chat-close">&times;</button>
     <iframe
@@ -110,6 +121,5 @@
       chatContainer.classList.remove('open');
     });
   </script>
-
 </body>
 </html>
