@@ -11,11 +11,14 @@
       --sal: env(safe-area-inset-left, 0px);
       --sar: env(safe-area-inset-right, 0px);
 
-      --mobile-gap: 12px;           /* sichtbarer Spalt oben (Mobile) */
-      --btn-size-desktop: 100px;    /* Button-Größe Desktop */
-      --btn-size-mobile: 72px;      /* Button-Größe Mobile */
+      --mobile-gap: 12px;             /* sichtbarer Spalt oben (Mobile) */
+      --btn-size-desktop: 100px;      /* Button-Größe Desktop */
+      --btn-size-mobile: 72px;        /* Button-Größe Mobile */
       --emoji-size-desktop: 36px;
       --emoji-size-mobile: 28px;
+
+      /* <<< Höhe, wie weit der Button auf Mobile vom unteren Rand weg soll >>> */
+      --btn-mobile-offset: 84px;      /* hier bei Bedarf anpassen */
     }
 
     html, body {
@@ -36,7 +39,7 @@
       z-index: 0;
     }
 
-    /* Launcher-Button (zeigt 💬 auf allen Devices) */
+    /* Launcher-Button (zeigt 💬) */
     #chat-toggle {
       position: fixed;
       bottom: calc(80px + var(--sab));
@@ -49,7 +52,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       z-index: 1003;
 
-      /* Holz-Optik beibehalten – gern entfernen, wenn du’s plain willst */
+      /* Holz-Optik – bei Bedarf entfernen */
       background-color: #A0522D;
       background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/tileable_wood_texture.png');
       background-size: cover;
@@ -63,7 +66,7 @@
       user-select: none;
     }
 
-    /* Desktop-Panel rechts (ausgefahren) */
+    /* Desktop-Panel rechts */
     #chat-container {
       position: fixed;
       right: -480px;     /* ausgeblendet */
@@ -121,7 +124,7 @@
       background: #fff;
     }
 
-    /* ===== Mobile: Rand-zu-Rand, Spalt oben, X-Header ===== */
+    /* ===== Mobile: Rand-zu-Rand, Spalt oben, X-Header, Button höher ===== */
     @media (max-width: 768px) {
       #chat-container {
         left: 0;
@@ -140,11 +143,11 @@
 
       #chat-header { display: flex; }
 
-      /* Kleinere Buttongröße & Emoji auf Mobile */
+      /* 👇 Nur auf Mobile: Button mit 💬 und höher setzen */
       #chat-toggle {
         width: var(--btn-size-mobile);
         height: var(--btn-size-mobile);
-        bottom: calc(20px + var(--sab));
+        bottom: calc(var(--btn-mobile-offset) + var(--sab));  /* höher */
         right: calc(16px + var(--sar));
         font-size: var(--emoji-size-mobile);
       }
@@ -154,7 +157,6 @@
       body.chat-open-mobile { overflow: hidden; touch-action: none; }
     }
 
-    /* Weniger Bewegung für Nutzer mit Reduzierter-Bewegung-Präferenz */
     @media (prefers-reduced-motion: reduce) {
       #chat-container { transition: none; }
     }
