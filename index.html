@@ -1,59 +1,230 @@
-/* Chat-Button – Holz-Kreis wie am Laptop */
-#chat-toggle{
-  position: fixed;
-  bottom: calc(80px + var(--sab, 0px));
-  right:  calc(80px + var(--sar, 0px));
-  width: 100px;
-  height: 100px;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 8px 18px rgba(0,0,0,.28);
-  z-index: 1003;
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Holzhaus mit Chat</title>
+  <style>
+    :root{
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
 
-  /* Holz-Optik (senkrechte Maserung + sanfte Lichtreflexion) */
-  background-image:
-    radial-gradient(ellipse at 30% 30%, rgba(255,255,255,.28), rgba(255,255,255,0) 60%),
-    url('https://www.toptal.com/designers/subtlepatterns/uploads/tileable_wood_texture.png');
-  background-size: 100% 100%, cover;
-  background-position: center;
-  background-repeat: no-repeat;
+      --mobile-gap: 12px;           /* sichtbarer Spalt oben (Mobile) */
+      --btn-size-desktop: 100px;    /* Button-Größe Desktop */
+      --btn-size-mobile: 72px;      /* Button-Größe Mobile */
+      --emoji-size-desktop: 36px;
+      --emoji-size-mobile: 28px;
+    }
 
-  display: grid;
-  place-items: center;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform .12s ease;
-}
-#chat-toggle:active{ transform: scale(.98); }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #fff;
+      overflow-x: hidden;
+    }
 
-/* Weiße Sprechblase (inline-SVG als Background) */
-#chat-toggle .icon{
-  width: 48px;
-  height: 48px;
-  display: block;
-  background: no-repeat center/contain
-    url("data:image/svg+xml;utf8,\
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>\
-  <path fill='%23ffffff' d='M20 2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9.17L16 22l.83-2H20a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Z'/>\
-</svg>");
-  /* leichter Schatten wie im Screenshot */
-  filter: drop-shadow(0 1.5px 0 rgba(0,0,0,.35));
-  pointer-events: none; /* sorgt dafür, dass der Button klickt, nicht das Icon */
-}
+    /* Hintergrundseite */
+    #background-iframe {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100dvh;
+      border: 0;
+      z-index: 0;
+    }
 
-/* Optional: kleinere, gleiche Optik auf Handy */
-@media (max-width: 768px){
-  #chat-toggle{
-    width: 90px;
-    height: 90px;
-    bottom: calc(32px + var(--sab, 0px));
-    right:  calc(32px + var(--sar, 0px));
-  }
-  #chat-toggle .icon{
-    width: 44px;
-    height: 44px;
-  }
+    /* Launcher-Button (zeigt 💬 auf allen Devices) */
+    #chat-toggle {
+      position: fixed;
+      bottom: calc(80px + var(--sab));
+      right: calc(80px + var(--sar));
+      width: var(--btn-size-desktop);
+      height: var(--btn-size-desktop);
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 1003;
 
-  /* Wenn der Chat offen ist, Button ausblenden (wie gewünscht) */
-  body.chat-open-mobile #chat-toggle{ display:none; }
-}
+      /* Holz-Optik beibehalten – gern entfernen, wenn du’s plain willst */
+      background-color: #A0522D;
+      background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/tileable_wood_texture.png');
+      background-size: cover;
+      background-position: center;
+
+      display: grid;
+      place-items: center;
+      font-size: var(--emoji-size-desktop);
+      line-height: 1;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    /* Desktop-Panel rechts (ausgefahren) */
+    #chat-container {
+      position: fixed;
+      right: -480px;     /* ausgeblendet */
+      top: 120px;
+      bottom: 200px;
+      width: 440px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+      overflow: hidden;
+      transition: right .28s ease-in-out;
+      z-index: 1002;
+
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+      overscroll-behavior: contain;
+    }
+    #chat-container.open { right: 80px; }
+
+    /* Mobile-Header mit X */
+    #chat-header {
+      display: none;
+      align-items: center;
+      justify-content: flex-end;
+      padding: calc(6px + var(--sat)) 8px 6px 8px;
+      background: rgba(255,255,255,0.96);
+      border-bottom: 1px solid #eee;
+      z-index: 2;
+      box-sizing: border-box;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    #chat-close {
+      border: none;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
+      width: 40px;
+      height: 40px;
+      border-radius: 20px;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    /* iFrame füllt den Rest */
+    #chat-iframe {
+      flex: 1 1 auto;
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+      box-sizing: border-box;
+      background: #fff;
+    }
+
+    /* ===== Mobile: Rand-zu-Rand, Spalt oben, X-Header ===== */
+    @media (max-width: 768px) {
+      #chat-container {
+        left: 0;
+        right: auto;
+        width: 100vw;
+        max-width: 100vw;
+        top: var(--mobile-gap);   /* sichtbarer Spalt */
+        bottom: 0;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        transform: translateY(110%);  /* unten ausgeblendet */
+        transition: transform .24s ease;
+      }
+      #chat-container.open { transform: translateY(0); }
+
+      #chat-header { display: flex; }
+
+      /* Kleinere Buttongröße & Emoji auf Mobile */
+      #chat-toggle {
+        width: var(--btn-size-mobile);
+        height: var(--btn-size-mobile);
+        bottom: calc(20px + var(--sab));
+        right: calc(16px + var(--sar));
+        font-size: var(--emoji-size-mobile);
+      }
+
+      /* Wenn Chat offen: Button verstecken + Seite blockieren */
+      body.chat-open-mobile #chat-toggle { display: none; }
+      body.chat-open-mobile { overflow: hidden; touch-action: none; }
+    }
+
+    /* Weniger Bewegung für Nutzer mit Reduzierter-Bewegung-Präferenz */
+    @media (prefers-reduced-motion: reduce) {
+      #chat-container { transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hintergrund -->
+  <iframe id="background-iframe" src="https://holzhaus.com" title="Holzhaus Hintergrund"></iframe>
+
+  <!-- Launcher-Button (EXAKT 💬) -->
+  <button id="chat-toggle" aria-label="Chat öffnen/schließen" title="Chat" aria-expanded="false">💬</button>
+
+  <!-- Chat-Container -->
+  <div id="chat-container" role="dialog" aria-modal="true" aria-label="Chat-Fenster">
+    <!-- Mobile-Header mit Schließen-X -->
+    <div id="chat-header">
+      <button id="chat-close" aria-label="Chat schließen" title="Schließen">×</button>
+    </div>
+
+    <iframe
+      id="chat-iframe"
+      src="https://chatthing.ai/de/bots/7684f02e-f045-46c0-9f7a-5afcaa397091/embed"
+      allow="clipboard-write; microphone;"
+      title="Chatbot">
+    </iframe>
+  </div>
+
+  <script>
+    const toggleBtn = document.getElementById('chat-toggle');
+    const chatContainer = document.getElementById('chat-container');
+    const closeBtn = document.getElementById('chat-close');
+
+    const mq = window.matchMedia('(max-width: 768px)');
+    const isMobile = () => mq.matches;
+
+    function openChat() {
+      chatContainer.classList.add('open');
+      toggleBtn.setAttribute('aria-expanded', 'true');
+      if (isMobile()) document.body.classList.add('chat-open-mobile');
+    }
+
+    function closeChat() {
+      chatContainer.classList.remove('open');
+      toggleBtn.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('chat-open-mobile');
+    }
+
+    function toggleChat() {
+      if (chatContainer.classList.contains('open')) closeChat();
+      else openChat();
+    }
+
+    toggleBtn.addEventListener('click', toggleChat);
+    closeBtn.addEventListener('click', closeChat);
+
+    // ESC zum Schließen
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && chatContainer.classList.contains('open')) {
+        closeChat();
+      }
+    });
+
+    mq.addEventListener('change', () => {
+      if (!isMobile()) {
+        document.body.classList.remove('chat-open-mobile');
+      } else if (chatContainer.classList.contains('open')) {
+        document.body.classList.add('chat-open-mobile');
+      }
+    });
+  </script>
+</body>
+</html>
