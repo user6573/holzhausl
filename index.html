@@ -2,12 +2,10 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <!-- Wichtig für iOS-Notch und Mobile-Viewport -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Holzhaus mit Chat</title>
   <style>
     :root {
-      /* Safe Areas (iOS) */
       --sat: env(safe-area-inset-top, 0px);
       --sab: env(safe-area-inset-bottom, 0px);
       --sal: env(safe-area-inset-left, 0px);
@@ -21,34 +19,33 @@
       background: #fff;
     }
 
-    /* Hintergrund-IFrame */
     #background-iframe {
       position: fixed;
       top: 0;
       left: 0;
       width: 100vw;
-      height: 100dvh; /* stabiler auf Mobilgeräten */
+      height: 100dvh;
       border: none;
       z-index: 0;
     }
 
-    /* Chat-Button */
+    /* Chat-Button wie vorher */
     #chat-toggle {
       position: fixed;
-      bottom: calc(24px + var(--sab));
-      right: calc(24px + var(--sar));
-      width: 72px;
-      height: 72px;
+      bottom: calc(80px + var(--sab));
+      right: calc(80px + var(--sar));
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
       border: none;
       cursor: pointer;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       z-index: 1002;
-      background-color: #A0522D; /* dunkler Holzton */
+      background-color: #A0522D;
       background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/tileable_wood_texture.png');
       background-size: cover;
       background-position: center;
-      font-size: 28px;
+      font-size: 36px;
       color: #fff;
       line-height: 1;
       display: grid;
@@ -56,47 +53,46 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Desktop/Tablet Chat-Container (seitlich) */
+    /* Desktop Chat-Fenster */
     #chat-container {
       position: fixed;
       top: 120px;
       bottom: 200px;
-      right: -480px; /* versteckt */
+      right: -480px;
       width: 440px;
       background: #fff;
       border: 1px solid #ccc;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
       overflow: hidden;
       transition: right 0.3s ease-in-out;
       z-index: 1001;
     }
     #chat-container.open {
-      right: 24px;
+      right: 80px;
     }
 
-    /* Chat-IFrame */
     #chat-iframe {
       width: 100%;
       height: 100%;
       border: none;
     }
 
-    /* ===== Mobile-Optimierung ===== */
+    /* Mobile Vollbild-Overlay */
     @media (max-width: 768px) {
-      /* Button größer & fingerfreundlicher */
       #chat-toggle {
-        width: 80px;
-        height: 80px;
-        font-size: 30px;
+        width: 90px;
+        height: 90px;
+        font-size: 32px;
+        bottom: calc(40px + var(--sab)); /* etwas näher am Rand */
+        right: calc(40px + var(--sar));
       }
 
-      /* Vollbild-Overlay für Chat */
       #chat-container {
         top: calc(8px + var(--sat));
         left: calc(8px + var(--sal));
         right: calc(8px + var(--sar));
-        bottom: calc(8px + var(--sab) + 96px); /* Platz für Button */
+        bottom: calc(8px + var(--sab) + 100px);
         width: auto;
         border-radius: 16px;
         border: none;
@@ -104,7 +100,6 @@
         transform: translateY(16px);
         opacity: 0;
         pointer-events: none;
-        right: 8px; /* Ausgangswert egal, da Overlay */
         transition: opacity 0.22s ease, transform 0.22s ease;
       }
       #chat-container.open {
@@ -113,7 +108,6 @@
         pointer-events: auto;
       }
 
-      /* Beim offenen Chat Scroll des Body verhindern (optional, angenehmer auf Mobile) */
       body.no-scroll {
         overflow: hidden;
         touch-action: none;
@@ -123,19 +117,16 @@
 </head>
 <body>
 
-  <!-- Vollbild-Hintergrund -->
   <iframe
     id="background-iframe"
     src="https://holzhaus.com"
     title="Holzhaus Hintergrund">
   </iframe>
 
-  <!-- Chat-Button -->
   <button id="chat-toggle" aria-label="Chat öffnen oder schließen" title="Chat">
     💬
   </button>
 
-  <!-- Chat-Fenster -->
   <div id="chat-container" role="dialog" aria-modal="true" aria-label="Chat-Fenster">
     <iframe
       id="chat-iframe"
@@ -148,14 +139,11 @@
   <script>
     const toggleBtn = document.getElementById('chat-toggle');
     const chatContainer = document.getElementById('chat-container');
-
     const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
 
     function toggleChat() {
       const willOpen = !chatContainer.classList.contains('open');
       chatContainer.classList.toggle('open');
-
-      // Body-Scroll auf Mobile sperren/freigeben
       if (isMobile()) {
         document.body.classList.toggle('no-scroll', willOpen);
       }
@@ -163,14 +151,11 @@
 
     toggleBtn.addEventListener('click', toggleChat);
 
-    // Falls sich die Viewport-Breite ändert: Body-Scroll-Status korrigieren
     window.addEventListener('resize', () => {
       if (!isMobile()) {
         document.body.classList.remove('no-scroll');
-      } else {
-        if (chatContainer.classList.contains('open')) {
-          document.body.classList.add('no-scroll');
-        }
+      } else if (chatContainer.classList.contains('open')) {
+        document.body.classList.add('no-scroll');
       }
     }, { passive: true });
   </script>
