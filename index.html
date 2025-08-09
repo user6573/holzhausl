@@ -18,6 +18,7 @@
       padding: 0;
       height: 100%;
       background: #fff;
+      overflow-x: hidden; /* verhindert horizontales Scrollen bei 100vw */
     }
 
     /* Hintergrundseite */
@@ -71,19 +72,20 @@
 
       display: flex;
       flex-direction: column;
+      box-sizing: border-box;
     }
     #chat-container.open { right: 80px; }
 
     /* Mobile-Header mit X (Desktop: aus) */
     #chat-header {
       display: none;
-      position: relative;
       align-items: center;
       justify-content: flex-end;
-      padding: calc(6px + var(--sat)) calc(8px + var(--sar)) 6px calc(8px + var(--sal));
+      padding: calc(6px + var(--sat)) 8px 6px 8px; /* ohne Safe-Area rechts/links -> kein optischer Rand */
       background: rgba(255,255,255,0.96);
       border-bottom: 1px solid #eee;
       z-index: 2;
+      box-sizing: border-box;
     }
     #chat-close {
       border: none;
@@ -101,35 +103,37 @@
     #chat-iframe {
       flex: 1 1 auto;
       width: 100%;
+      height: 100%;
       border: none;
       display: block;
-      z-index: 1;
+      box-sizing: border-box;
     }
 
-    /* ===== Mobile: volle Breite, oben Spalt, X sichtbar, Button aus wenn offen ===== */
+    /* ===== Mobile: volle Breite bis zum rechten Rand ===== */
     @media (max-width: 768px) {
-      /* Container: volle Breite, oben kleiner Spalt */
+      /* Container: 100vw Breite, links=0, KEIN Rand rechts */
       #chat-container {
         left: 0;
-        right: 0;
+        right: auto;           /* wichtig, sonst manche Browser lassen rechts Platz */
+        width: 100vw;          /* exakt Viewport-Breite */
+        max-width: 100vw;
         top: var(--mobile-gap);
         bottom: 0;
-        width: auto;
         border: none;
-        border-radius: 12px 12px 0 0; /* optional hübsch; auf 0 setzen für harte Kante */
-        box-shadow: 0 -6px 24px rgba(0,0,0,0.28);
+        border-radius: 0;      /* keine Rundung, damit es optisch ganz anliegt */
+        box-shadow: none;
         transform: translateY(110%);  /* unten ausgeblendet */
         transition: transform .24s ease;
       }
       #chat-container.open { transform: translateY(0); }
 
-      /* Header mit X zeigen */
+      /* Header mit X sichtbar */
       #chat-header { display: flex; }
 
       /* Wenn Chat offen: Button verstecken */
       body.chat-open-mobile #chat-toggle { display: none; }
 
-      /* Body-Scroll sperren, damit Seite nicht dahinter scrollt */
+      /* Seite dahinter nicht scrollen */
       body.chat-open-mobile { overflow: hidden; touch-action: none; }
     }
   </style>
@@ -167,7 +171,7 @@
 
     function openChat() {
       chatContainer.classList.add('open');
-      if (isMobile()) document.body.classList.add('chat-open-mobile'); // Button ausblenden & Scroll sperren
+      if (isMobile()) document.body.classList.add('chat-open-mobile');
     }
 
     function closeChat() {
@@ -180,14 +184,12 @@
       else openChat();
     }
 
-    // Events
     toggleBtn.addEventListener('click', toggleChat);
     closeBtn.addEventListener('click', closeChat);
 
-    // Beim Wechsel Mobile/Desktop Zustand konsistent halten
     mq.addEventListener('change', () => {
       if (!isMobile()) {
-        document.body.classList.remove('chat-open-mobile'); // Button wieder zeigen
+        document.body.classList.remove('chat-open-mobile');
       } else if (chatContainer.classList.contains('open')) {
         document.body.classList.add('chat-open-mobile');
       }
