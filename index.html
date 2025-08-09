@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Holzhaus mit Chat</title>
   <style>
-    :root {
+    :root{
       --sat: env(safe-area-inset-top, 0px);
       --sab: env(safe-area-inset-bottom, 0px);
       --sal: env(safe-area-inset-left, 0px);
@@ -29,7 +29,7 @@
       z-index: 0;
     }
 
-    /* Chat-Button (gleiches Icon wie Desktop) */
+    /* Chat-Button (identisch zu Desktop) */
     #chat-toggle {
       position: fixed;
       bottom: calc(80px + var(--sab));
@@ -41,7 +41,7 @@
       cursor: pointer;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       z-index: 1003;
-      background-color: #A0522D;
+      background-color: #A0522D; /* dunkler Holzton */
       background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/tileable_wood_texture.png');
       background-size: cover;
       background-position: center;
@@ -51,133 +51,99 @@
       display: grid;
       place-items: center;
       -webkit-tap-highlight-color: transparent;
-      transition: transform .15s ease;
     }
-    #chat-toggle:active { transform: scale(0.98); }
-    #chat-toggle.hidden { display: none; } /* nur mobil bei offenem Chat */
 
-    /* Desktop: seitliches Panel */
+    /* Chat-Container: Desktop-Panel (rechts rein) */
     #chat-container {
       position: fixed;
+      right: -480px;              /* ausgeblendet */
       top: 120px;
       bottom: 200px;
-      right: -480px; /* versteckt */
       width: 440px;
       background: #fff;
       border: 1px solid #e5e7eb;
       border-radius: 12px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.22);
       overflow: hidden;
-      transition: right 0.28s ease-in-out;
+      transition: right .28s ease-in-out;
       z-index: 1002;
+
+      /* WICHTIG: Flex-Layout für Mobile-Header + Iframe */
+      display: flex;
+      flex-direction: column;
     }
     #chat-container.open { right: 80px; }
 
-    /* Chat-iframe */
-    #chat-iframe {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
+    /* Mobile-Header (X) – standardmäßig aus (Desktop) */
+    #chat-header {
+      display: none;
+      align-items: center;
+      justify-content: flex-end;
+      padding: calc(6px + var(--sat)) calc(8px + var(--sar)) 6px calc(8px + var(--sal));
+      background: rgba(255,255,255,0.96);
+      border-bottom: 1px solid #eee;
+      z-index: 2; /* über dem iframe */
     }
-
-    /* Mobile Close-X: standardmäßig aus, nur auf Mobile sichtbar */
     #chat-close {
-      display: none; /* Desktop: unsichtbar */
-      position: absolute;
-      top: calc(10px + var(--sat));
-      right: calc(10px + var(--sar));
+      border: none;
+      background: rgba(0,0,0,0.55);
+      color: #fff;
       width: 40px;
       height: 40px;
-      border: none;
       border-radius: 20px;
       font-size: 24px;
       line-height: 1;
       cursor: pointer;
-      z-index: 1004;
-      background: rgba(0,0,0,0.55);
-      color: #fff;
-      backdrop-filter: blur(4px);
     }
 
-    /* Abdunkelung auf Mobile */
-    #backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.35);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .22s ease;
-      z-index: 1001;
-      backdrop-filter: blur(2px);
-    }
-    #backdrop.show {
-      opacity: 1;
-      pointer-events: auto;
+    /* iFrame nimmt restliche Höhe */
+    #chat-iframe {
+      flex: 1 1 auto;
+      width: 100%;
+      border: none;
+      display: block;
+      z-index: 1;
     }
 
-    /* ===== Mobile Layout: Bottom-Sheet, 100% Breite ===== */
+    /* ===== Mobile: Vollbild, Button ausblenden wenn offen, X sichtbar ===== */
     @media (max-width: 768px) {
-      #chat-toggle {
-        width: 90px;
-        height: 90px;
-        font-size: 32px;
-        bottom: calc(32px + var(--sab));
-        right: calc(32px + var(--sar));
-      }
-
+      /* Chat-Container wird Vollbild */
       #chat-container {
         left: 0;
         right: 0;
-        width: 100%;
-        border: none;
-        border-radius: 16px 16px 0 0;
-        box-shadow: 0 -6px 24px rgba(0,0,0,0.28);
-        top: auto;
+        top: 0;
         bottom: 0;
-        height: calc(100dvh - 12px - var(--sat));
-        transform: translateY(110%); /* unten ausgeblendet */
-        transition: transform .24s ease, border-radius .24s ease;
+        width: auto;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        transform: translateY(100%);  /* ausgeblendet */
+        transition: transform .24s ease;
       }
-      #chat-container.open {
-        transform: translateY(0);
-      }
+      #chat-container.open { transform: translateY(0); }
 
-      /* Mobile X sichtbar */
-      #chat-close {
-        display: inline-grid;
-        place-items: center;
-      }
+      /* Header mit X einblenden */
+      #chat-header { display: flex; }
 
-      /* Body-Lock bei offenem Chat */
-      body.no-scroll {
-        overflow: hidden;
-        touch-action: none;
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        #chat-container, #backdrop, #chat-toggle { transition: none; }
-      }
+      /* Wenn Chat offen: Button ausblenden */
+      body.chat-open-mobile #chat-toggle { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Hintergrund -->
+  <!-- Hintergrundseite -->
   <iframe id="background-iframe" src="https://holzhaus.com" title="Holzhaus Hintergrund"></iframe>
 
-  <!-- Backdrop (nur mobil sichtbar, wenn Chat offen) -->
-  <div id="backdrop" aria-hidden="true"></div>
-
-  <!-- Chat-Button (gleiches Icon wie Laptop) -->
+  <!-- Chat-Button (gleich auf Mobile & Desktop) -->
   <button id="chat-toggle" aria-label="Chat öffnen/schließen" title="Chat">💬</button>
 
   <!-- Chat-Container -->
   <div id="chat-container" role="dialog" aria-modal="true" aria-label="Chat-Fenster">
-    <!-- Mobile-Schließen (X) -->
-    <button id="chat-close" aria-label="Chat schließen" title="Schließen">×</button>
+    <!-- Mobile-Header mit Schließen-X -->
+    <div id="chat-header">
+      <button id="chat-close" aria-label="Chat schließen" title="Schließen">×</button>
+    </div>
 
     <iframe
       id="chat-iframe"
@@ -190,50 +156,41 @@
   <script>
     const toggleBtn = document.getElementById('chat-toggle');
     const chatContainer = document.getElementById('chat-container');
-    const backdrop = document.getElementById('backdrop');
     const closeBtn = document.getElementById('chat-close');
 
-    const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
-
-    function applyMobileState(open) {
-      if (isMobile()) {
-        // Button ausblenden, wenn Chat offen; Backdrop & Body-Lock setzen
-        toggleBtn.classList.toggle('hidden', open);
-        backdrop.classList.toggle('show', open);
-        document.body.classList.toggle('no-scroll', open);
-      } else {
-        // Desktop: nie verstecken, kein Backdrop/Body-Lock
-        toggleBtn.classList.remove('hidden');
-        backdrop.classList.remove('show');
-        document.body.classList.remove('no-scroll');
-      }
-    }
+    const mq = window.matchMedia('(max-width: 768px)');
+    const isMobile = () => mq.matches;
 
     function openChat() {
       chatContainer.classList.add('open');
-      applyMobileState(true);
+      if (isMobile()) {
+        document.body.classList.add('chat-open-mobile'); // versteckt Button auf Mobile
+      }
     }
 
     function closeChat() {
       chatContainer.classList.remove('open');
-      applyMobileState(false);
+      document.body.classList.remove('chat-open-mobile');
     }
 
     function toggleChat() {
-      if (chatContainer.classList.contains('open')) {
-        closeChat();
-      } else {
-        openChat();
-      }
+      if (chatContainer.classList.contains('open')) closeChat();
+      else openChat();
     }
 
     // Events
     toggleBtn.addEventListener('click', toggleChat);
-    // X schließt nur auf Mobile (auf Desktop ist es unsichtbar)
     closeBtn.addEventListener('click', closeChat);
 
-    // Responsive Konsistenz
-    window.addEventListener('resize', () => {
-      if (isMobile()) {
-        // Mobil: Button verstecken, wenn offen
-        toggleBtn.classList.toggle('hidd
+    // Wenn sich die Bildschirmgröße ändert, Zustand sauber halten
+    mq.addEventListener('change', () => {
+      // Wechsele zwischen Mobile/Desktop → Button wieder anzeigen
+      if (!isMobile()) {
+        document.body.classList.remove('chat-open-mobile');
+      } else if (chatContainer.classList.contains('open')) {
+        document.body.classList.add('chat-open-mobile');
+      }
+    });
+  </script>
+</body>
+</html>
