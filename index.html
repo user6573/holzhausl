@@ -2,14 +2,23 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Wichtig für iOS-Notch und Mobile-Viewport -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Holzhaus mit Chat</title>
   <style>
-    /* HTML/Body komplett ohne Ränder */
+    :root {
+      /* Safe Areas (iOS) */
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+    }
+
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
+      background: #fff;
     }
 
     /* Hintergrund-IFrame */
@@ -18,89 +27,116 @@
       top: 0;
       left: 0;
       width: 100vw;
-      height: 100vh;
+      height: 100dvh; /* stabiler auf Mobilgeräten */
       border: none;
       z-index: 0;
     }
 
-    /* Chat-Button: etwas dunkleres Holz, aber gut erkennbar */
+    /* Chat-Button */
     #chat-toggle {
       position: fixed;
-      bottom: 80px;
-      right: 80px;
-      width: 100px;
-      height: 100px;
+      bottom: calc(24px + var(--sab));
+      right: calc(24px + var(--sar));
+      width: 72px;
+      height: 72px;
       border-radius: 50%;
       border: none;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      z-index: 2;
-      /* Dunklerer Holz-Fallback */
-      background-color: #A0522D; /* Sienna, dunkler Holzton */
-      /* Holztextur */
+      box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+      z-index: 1002;
+      background-color: #A0522D; /* dunkler Holzton */
       background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/tileable_wood_texture.png');
       background-size: cover;
       background-position: center;
-      font-size: 36px;
+      font-size: 28px;
       color: #fff;
       line-height: 1;
+      display: grid;
+      place-items: center;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    /* Chat-Container: dynamische Höhe und Abstand zur Leiste */
+    /* Desktop/Tablet Chat-Container (seitlich) */
     #chat-container {
       position: fixed;
-      top: 120px;         /* Abstand zum oberen Rand, um Leiste freizuhalten */
-      bottom: 200px;      /* Abstand zum unteren Rand (Platz für den Button) */
-      right: -480px;      /* versteckt außerhalb */
+      top: 120px;
+      bottom: 200px;
+      right: -480px; /* versteckt */
       width: 440px;
       background: #fff;
       border: 1px solid #ccc;
-      border-radius: 8px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
       overflow: hidden;
       transition: right 0.3s ease-in-out;
-      z-index: 1;
+      z-index: 1001;
     }
     #chat-container.open {
-      right: 80px;       /* passend zum Button */
+      right: 24px;
     }
 
-    /* Schließen-Knopf im Chat */
-    #chat-close {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      background: transparent;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      color: #666;
-      z-index: 2;
-    }
-
-    /* Bot-IFrame füllt den Container komplett */
+    /* Chat-IFrame */
     #chat-iframe {
       width: 100%;
       height: 100%;
       border: none;
     }
+
+    /* ===== Mobile-Optimierung ===== */
+    @media (max-width: 768px) {
+      /* Button größer & fingerfreundlicher */
+      #chat-toggle {
+        width: 80px;
+        height: 80px;
+        font-size: 30px;
+      }
+
+      /* Vollbild-Overlay für Chat */
+      #chat-container {
+        top: calc(8px + var(--sat));
+        left: calc(8px + var(--sal));
+        right: calc(8px + var(--sar));
+        bottom: calc(8px + var(--sab) + 96px); /* Platz für Button */
+        width: auto;
+        border-radius: 16px;
+        border: none;
+        box-shadow: 0 10px 28px rgba(0,0,0,0.28);
+        transform: translateY(16px);
+        opacity: 0;
+        pointer-events: none;
+        right: 8px; /* Ausgangswert egal, da Overlay */
+        transition: opacity 0.22s ease, transform 0.22s ease;
+      }
+      #chat-container.open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* Beim offenen Chat Scroll des Body verhindern (optional, angenehmer auf Mobile) */
+      body.no-scroll {
+        overflow: hidden;
+        touch-action: none;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <!-- Vollbild-Hintergrund: Holzhaus-Webseite -->
+  <!-- Vollbild-Hintergrund -->
   <iframe
     id="background-iframe"
     src="https://holzhaus.com"
     title="Holzhaus Hintergrund">
   </iframe>
 
-  <!-- Button zum Öffnen des Chats -->
-  <button id="chat-toggle">💬</button>
+  <!-- Chat-Button -->
+  <button id="chat-toggle" aria-label="Chat öffnen oder schließen" title="Chat">
+    💬
+  </button>
 
   <!-- Chat-Fenster -->
-  <div id="chat-container">
-    <button id="chat-close">&times;</button>
+  <div id="chat-container" role="dialog" aria-modal="true" aria-label="Chat-Fenster">
     <iframe
       id="chat-iframe"
       src="https://chatthing.ai/de/bots/7684f02e-f045-46c0-9f7a-5afcaa397091/embed"
@@ -112,14 +148,31 @@
   <script>
     const toggleBtn = document.getElementById('chat-toggle');
     const chatContainer = document.getElementById('chat-container');
-    const closeBtn = document.getElementById('chat-close');
 
-    toggleBtn.addEventListener('click', () => {
+    const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
+
+    function toggleChat() {
+      const willOpen = !chatContainer.classList.contains('open');
       chatContainer.classList.toggle('open');
-    });
-    closeBtn.addEventListener('click', () => {
-      chatContainer.classList.remove('open');
-    });
+
+      // Body-Scroll auf Mobile sperren/freigeben
+      if (isMobile()) {
+        document.body.classList.toggle('no-scroll', willOpen);
+      }
+    }
+
+    toggleBtn.addEventListener('click', toggleChat);
+
+    // Falls sich die Viewport-Breite ändert: Body-Scroll-Status korrigieren
+    window.addEventListener('resize', () => {
+      if (!isMobile()) {
+        document.body.classList.remove('no-scroll');
+      } else {
+        if (chatContainer.classList.contains('open')) {
+          document.body.classList.add('no-scroll');
+        }
+      }
+    }, { passive: true });
   </script>
 </body>
 </html>
