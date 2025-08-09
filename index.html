@@ -16,9 +16,9 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      background: #fff;
     }
 
+    /* Hintergrund */
     #background-iframe {
       position: fixed;
       top: 0;
@@ -29,7 +29,7 @@
       z-index: 0;
     }
 
-    /* Chat-Button wie vorher */
+    /* Chat-Button (wie ursprünglich) */
     #chat-toggle {
       position: fixed;
       bottom: calc(80px + var(--sab));
@@ -41,16 +41,13 @@
       cursor: pointer;
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       z-index: 1002;
-      background-color: #A0522D;
+      background-color: #A0522D; /* dunkler Holzton */
       background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/tileable_wood_texture.png');
       background-size: cover;
       background-position: center;
       font-size: 36px;
       color: #fff;
       line-height: 1;
-      display: grid;
-      place-items: center;
-      -webkit-tap-highlight-color: transparent;
     }
 
     /* Desktop Chat-Fenster */
@@ -78,23 +75,15 @@
       border: none;
     }
 
-    /* Mobile Vollbild-Overlay */
+    /* Mobile Vollbild-Breite */
     @media (max-width: 768px) {
-      #chat-toggle {
-        width: 90px;
-        height: 90px;
-        font-size: 32px;
-        bottom: calc(40px + var(--sab)); /* etwas näher am Rand */
-        right: calc(40px + var(--sar));
-      }
-
       #chat-container {
         top: calc(8px + var(--sat));
-        left: calc(8px + var(--sal));
-        right: calc(8px + var(--sar));
+        left: calc(0px + var(--sal));
+        right: calc(0px + var(--sar));
         bottom: calc(8px + var(--sab) + 100px);
-        width: auto;
-        border-radius: 16px;
+        width: 100%;
+        border-radius: 0;
         border: none;
         box-shadow: 0 10px 28px rgba(0,0,0,0.28);
         transform: translateY(16px);
@@ -108,6 +97,7 @@
         pointer-events: auto;
       }
 
+      /* Scroll sperren bei offenem Chat */
       body.no-scroll {
         overflow: hidden;
         touch-action: none;
@@ -117,17 +107,18 @@
 </head>
 <body>
 
+  <!-- Hintergrund -->
   <iframe
     id="background-iframe"
     src="https://holzhaus.com"
     title="Holzhaus Hintergrund">
   </iframe>
 
-  <button id="chat-toggle" aria-label="Chat öffnen oder schließen" title="Chat">
-    💬
-  </button>
+  <!-- Chat-Button -->
+  <button id="chat-toggle">💬</button>
 
-  <div id="chat-container" role="dialog" aria-modal="true" aria-label="Chat-Fenster">
+  <!-- Chat-Fenster -->
+  <div id="chat-container">
     <iframe
       id="chat-iframe"
       src="https://chatthing.ai/de/bots/7684f02e-f045-46c0-9f7a-5afcaa397091/embed"
